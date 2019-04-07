@@ -16,7 +16,7 @@ function addLevelDBData(key, value) {
 }
 
 // Get data from levelDB with key
-function getLevelDBData(key) { // eslint-disable-line no-unused-vars
+function getLevelDBData(key) {
     db.get(key, function (err, value) {
         if (err) return console.log('Not found!', err);
         console.log(`Value = ${value}`);
@@ -56,4 +56,9 @@ function theLoop(i) {
     }, 100);
 }
 
-theLoop(10);
+module.exports = {
+    addLevelDBData,
+    getLevelDBData,
+    addDataToLevelDB,
+    theLoop,
+};

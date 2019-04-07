@@ -3,6 +3,7 @@
 |  =========================================================*/
 
 const SHA256 = require('crypto-js/sha256');
+const dbService = require('./levelSandbox'); // eslint-disable-line no-unused-vars
 
 /* ===== Block Class ==============================
 |  Class with a constructor for block             |
