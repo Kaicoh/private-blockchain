@@ -17,6 +17,18 @@ class Block {
         this.time = 0;
         this.previousBlockHash = '';
     }
+
+    setProps({
+        height = 0,
+        time = new Date().getTime().toString().slice(0, -3),
+        previousBlockHash = '',
+    } = {}) {
+        this.height = height;
+        this.time = time;
+        this.previousBlockHash = previousBlockHash;
+        this.hash = SHA256(JSON.stringify(this)).toString();
+        return this;
+    }
 }
 
 /* ===== Blockchain Class ==========================
@@ -24,40 +36,45 @@ class Block {
 |  ================================================*/
 
 class Blockchain { // eslint-disable-line no-unused-vars
+    static storeGenesisBlock() {
+        const genesisBlock = new Block('First block in the chain - Genesis block').setProps();
+        return dbService.store(0, genesisBlock);
+    }
+
     constructor() {
-        this.chain = [];
-        this.addBlock(new Block('First block in the chain - Genesis block'));
+        Blockchain.storeGenesisBlock();
     }
 
     // Add new block
     addBlock(newBlock) {
-        /* eslint-disable no-param-reassign */
-
-        // Block height
-        newBlock.height = this.chain.length;
-        // UTC timestamp
-        newBlock.time = new Date().getTime().toString().slice(0, -3);
-        // previous block hash
-        if (this.chain.length > 0) {
-            newBlock.previousBlockHash = this.chain[this.chain.length - 1].hash;
-        }
-        // Block hash with SHA256 using newBlock and converting to a string
-        newBlock.hash = SHA256(JSON.stringify(newBlock)).toString();
-
-        /* eslint-enable no-param-reassign */
-        // Adding block object to chain
-        this.chain.push(newBlock);
+        return this.getBlock(0)
+            .then((block) => {
+                if (block) return null;
+                return Blockchain.storeGenesisBlock();
+            })
+            .then(() => this.getLastBlock()) // NOTE: Using arrow function to bind "this"
+            .then(({ height, hash }) => dbService.store(
+                height + 1,
+                newBlock.setProps({ height: height + 1, previousBlockHash: hash }),
+            ))
+            .catch((err) => {
+                console.log('Failed to add block', err);
+            });
     }
 
     // Get block height
-    getBlockHeight() {
-        return this.chain.length - 1;
+    getBlockHeight() { // eslint-disable-line class-methods-use-this
+        return dbService.getDataCount().then(num => num - 1);
     }
 
     // get block
-    getBlock(blockHeight) {
-        // return object as a single string
-        return JSON.parse(JSON.stringify(this.chain[blockHeight]));
+    getBlock(blockHeight) { // eslint-disable-line class-methods-use-this
+        return dbService.get(blockHeight);
+    }
+
+    // get last block
+    getLastBlock() {
+        return this.getBlockHeight().then(this.getBlock);
     }
 
     // validate block
@@ -99,3 +116,8 @@ class Blockchain { // eslint-disable-line no-unused-vars
         }
     }
 }
+
+module.exports = {
+    Block,
+    Blockchain,
+};
