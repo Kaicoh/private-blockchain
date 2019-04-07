@@ -21,10 +21,6 @@ function addLevelDBData(key, value) {
 function getLevelDBData(key) {
     return db.get(key)
         .then(JSON.parse)
-        .then((value) => {
-            console.log(`Value = ${value}`);
-            return value;
-        })
         .catch((err) => {
             console.log('Not found!', err);
             return null;
