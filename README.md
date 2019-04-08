@@ -74,7 +74,7 @@ When success, a new block will create and the created block data will return wit
 }
 ```
 
-When you request with any content on the payload, a new block won't be created and will return the message "Data payload is required" with http status code 400.
+When you request with any content on the payload or request with data without body property, a new block won't be created and will return http status code 400 with error message.
 
 ## Testing
 
