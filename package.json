@@ -5,8 +5,8 @@
   "main": "app.js",
   "scripts": {
     "clear": "rimraf ./chaindata",
-    "lint": "eslint simpleChain.js levelSandbox.js app.js",
-    "test": "npm run clear && node app.js"
+    "lint": "eslint simpleChain.js levelSandbox.js test.js",
+    "test": "npm run clear && node test.js"
   },
   "keywords": [],
   "author": "",
