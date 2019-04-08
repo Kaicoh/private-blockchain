@@ -9,7 +9,10 @@ async function test() {
     }
 
     const firstResult = await blockchain.validateChain();
-    console.log('validate chain 1:', firstResult);
+    console.log('###################################');
+    console.log(`# validation result #1: ${firstResult ? 'success🎉' : 'failure❌'} #`);
+    console.log('###################################');
+    console.log('');
 
     const inducedErrorBlocks = [2, 4, 7];
     inducedErrorBlocks.forEach(async (num) => {
@@ -17,7 +20,10 @@ async function test() {
     });
 
     const secondResult = await blockchain.validateChain();
-    console.log('validate chain 2:', secondResult);
+    console.log('');
+    console.log('###################################');
+    console.log(`# validation result #2: ${secondResult ? 'success🎉' : 'failure❌'} #`);
+    console.log('###################################');
 }
 
 test();

@@ -58,6 +58,13 @@ class Blockchain {
         Blockchain.storeGenesisBlock();
     }
 
+    getChain() {
+        return this.getBlockHeights()
+            .then(heights => Promise.all(
+                heights.map(height => this.getBlock(height)),
+            ));
+    }
+
     // Add new block
     addBlock(newBlock) {
         return this.getBlock(0)
@@ -121,9 +128,8 @@ class Blockchain {
 
     // validate the hash chain
     validateHashChain() {
-        return this.getBlockHeights()
-            .then(heights => heights.map(height => this.getBlock(height)))
-            .then(blocks => blocks.every((block, idx) => {
+        return this.getChain()
+            .then(blocks => blocks.map((block, idx) => {
                 if (idx === blocks.length - 1) {
                     return true;
                 }
@@ -136,7 +142,8 @@ class Blockchain {
                 console.log(`Block #${idx} hash: ${block.hash}`);
                 console.log(`Block #${idx + 1} previousBlockHash: ${blocks[idx + 1].previousBlockHash}`);
                 return false;
-            }));
+            }))
+            .then(results => results.every(R.identity));
     }
 
     // Validate blockchain
@@ -152,7 +159,7 @@ class Blockchain {
     UNSAFE_modifyBlock(blockHeight, data = 'invalid data') { // eslint-disable-line camelcase
         return this.getBlock(blockHeight)
             .then((block) => {
-                block.data = data; // eslint-disable-line no-param-reassign
+                block.hash = data; // eslint-disable-line no-param-reassign
                 return dbService.store(blockHeight, block);
             });
     }
