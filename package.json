@@ -23,6 +23,7 @@
     "rimraf": "^2.6.3"
   },
   "dependencies": {
+    "body-parser": "^1.18.3",
     "crypto-js": "^3.1.9-1",
     "express": "^4.16.4",
     "level": "^5.0.1",

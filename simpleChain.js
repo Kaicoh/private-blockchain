@@ -79,6 +79,7 @@ class Blockchain {
                 newBlock.resetHash();
                 return dbService.store(newBlock.height, newBlock);
             })
+            .then(() => newBlock)
             .catch((err) => {
                 console.log('Failed to add block', err);
             });
