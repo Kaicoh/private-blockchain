@@ -21,7 +21,7 @@ app.post('/block', async (req, res) => {
         const block = await blockchain.addBlock(new Block({ data }));
         return res.status(201).json(block);
     }
-    return res.status(400).send('data payload required.');
+    return res.status(400).send('Data payload is required.');
 });
 
 app.listen(port, () => {
