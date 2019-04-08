@@ -126,7 +126,7 @@ class Blockchain {
             .then(results => results.every(R.identity));
     }
 
-    // validate the hash chain
+    // compare block hash and previous block hash
     validateHashChain() {
         return this.getChain()
             .then(blocks => blocks.map((block, idx) => {
