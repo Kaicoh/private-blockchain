@@ -4,6 +4,7 @@
   "description": "Blockchain has the potential to change the way that the world approaches data. Develop Blockchain skills by understanding the data model behind Blockchain by developing your own simplified private blockchain.",
   "main": "app.js",
   "scripts": {
+    "start": "npm run clear && node app.js",
     "clear": "rimraf ./chaindata",
     "lint": "eslint simpleChain.js levelSandbox.js test.js",
     "test": "npm run clear && node test.js"
@@ -23,6 +24,7 @@
   },
   "dependencies": {
     "crypto-js": "^3.1.9-1",
+    "express": "^4.16.4",
     "level": "^5.0.1",
     "ramda": "^0.26.1"
   }
