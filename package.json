@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "crypto-js": "^3.1.9-1",
-    "level": "^5.0.1"
+    "level": "^5.0.1",
+    "ramda": "^0.26.1"
   }
 }

@@ -3,6 +3,7 @@
 |  =========================================================*/
 
 const SHA256 = require('crypto-js/sha256');
+const R = require('ramda');
 const dbService = require('./levelSandbox');
 
 /* ===== Block Class ==============================
@@ -81,6 +82,11 @@ class Blockchain {
         return dbService.getDataCount().then(num => num - 1);
     }
 
+    getBlockHeights() {
+        // return [0, 1, 2, ... , height ]
+        return this.getBlockHeight().then(height => R.range(0, height + 1));
+    }
+
     // get block
     getBlock(blockHeight) { // eslint-disable-line class-methods-use-this
         return dbService.get(blockHeight).then(obj => new Block(obj));
@@ -105,39 +111,38 @@ class Blockchain {
             });
     }
 
-    // validate the hash chain
-    validateHashChain(blockHeight) {
-        if (blockHeight === 0) return Promise.resolve(true);
-
-        return Promise.all([this.getBlock(blockHeight - 1), this.getBlock(blockHeight)])
-            .then(([previousBlock, block]) => {
-                if (previousBlock.hash === block.previousBlockHash) {
-                    return true;
-                }
-                console.log('The chain of hashes is broken');
-                console.log(`Block #${previousBlock.height} hash: ${previousBlock.hash}`);
-                console.log(`Block #${block.height} previousBlockHash: ${block.previousBlockHash}`);
-                return false;
-            })
-            .catch((err) => {
-                console.log(`Failed to validate the link of blocks #${blockHeight}`, err);
-            });
+    validateBlocks() {
+        return this.getBlockHeights()
+            .then(heights => Promise.all(
+                heights.map(height => this.validateBlock(height)),
+            ))
+            .then(results => results.every(R.identity));
     }
 
-    validateBlockAndHashChain(blockHeight) {
-        return Promise.all(
-            [this.validateBlock(blockHeight), this.validateHashChain(blockHeight)],
-        ).then(([result1, result2]) => result1 && result2);
+    // validate the hash chain
+    validateHashChain() {
+        return this.getBlockHeights()
+            .then(heights => heights.map(height => this.getBlock(height)))
+            .then(blocks => blocks.every((block, idx) => {
+                if (idx === blocks.length - 1) {
+                    return true;
+                }
+
+                if (block.hash === blocks[idx + 1].previousBlockHash) {
+                    return true;
+                }
+
+                console.log('Invalid hash chain');
+                console.log(`Block #${idx} hash: ${block.hash}`);
+                console.log(`Block #${idx + 1} previousBlockHash: ${blocks[idx + 1].previousBlockHash}`);
+                return false;
+            }));
     }
 
     // Validate blockchain
     validateChain() {
-        return this.getBlockHeight()
-            .then(height => Array.from(Array(height).keys()))
-            .then(heights => Promise.all(
-                heights.map(height => this.validateBlockAndHashChain(height)),
-            ))
-            .then(results => results.every(result => result))
+        return Promise.all([this.validateBlocks(), this.validateHashChain()])
+            .then(([result1, result2]) => result1 && result2)
             .catch((err) => {
                 console.log('Failed to validate chain', err);
             });
