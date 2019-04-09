@@ -1,13 +1,24 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const { Blockchain, Block } = require('./simpleChain');
+const Mempool = require('./mempool');
 
 const app = express();
 const port = 8000;
 
 const blockchain = new Blockchain();
+const mempool = new Mempool();
 
 app.use(bodyParser.json());
+
+app.post('/requestValidation', (req, res) => {
+    const walletAddress = req.body.address;
+    if (walletAddress) {
+        const requestObject = mempool.push(walletAddress);
+        return res.json(requestObject);
+    }
+    return res.status(400).send('Data payload is required. And it must have "address" property.');
+});
 
 app.get('/block/:blockHeight', async (req, res) => {
     const blockHeight = parseInt(req.params.blockHeight, 10);

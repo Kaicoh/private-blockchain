@@ -6,11 +6,11 @@ class Mempool {
         this.requests = new Map();
     }
 
-    // add key(walletAddress), value(timeStamp) to requests Map and return message.
+    // add key(walletAddress), value(timeStamp) to requests Map and return requestObject.
     push(walletAddress) {
         // "If the user re-submits a request, the application will not add a new request."
         if (this.requests.has(walletAddress)) {
-            return this.message(walletAddress);
+            return this.requestObject(walletAddress);
         }
 
         this.requests.set(walletAddress, new Date().getTime());
@@ -20,7 +20,7 @@ class Mempool {
             this.requests.delete(walletAddress);
         }, TimeoutRequestsWindowTime);
 
-        return this.message(walletAddress);
+        return this.requestObject(walletAddress);
     }
 
     timeLeft(walletAddress) {
@@ -32,12 +32,17 @@ class Mempool {
         return 0;
     }
 
-    message(walletAddress) {
+    requestObject(walletAddress) {
         if (this.requests.has(walletAddress)) {
-            const timeStamp = this.requests.get(walletAddress).toString().slice(0, -3);
-            return `${walletAddress}:${timeStamp}:starRegistry`;
+            const requestTimeStamp = this.requests.get(walletAddress).toString().slice(0, -3);
+            return {
+                walletAddress,
+                requestTimeStamp,
+                message: `${walletAddress}:${requestTimeStamp}:starRegistry`,
+                validationWindow: parseInt(TimeoutRequestsWindowTime / 1000, 10),
+            };
         }
-        return '';
+        return null;
     }
 }
 
