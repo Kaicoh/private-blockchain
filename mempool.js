@@ -66,7 +66,9 @@ class Mempool {
         const validRequestObject = {
             registerStar: validationResult,
             status: {
-                ...this.requestObject(walletAddress),
+                address: walletAddress,
+                requestTimeStamp: this.requestTimeStamp(walletAddress),
+                message: this.message(walletAddress),
                 validationWindow: this.timeLeft(walletAddress),
                 messageSignature: validationResult,
             },

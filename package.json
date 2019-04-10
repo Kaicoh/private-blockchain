@@ -7,7 +7,7 @@
     "start": "npm run clear && node app.js",
     "clear": "rimraf ./chaindata",
     "lint": "eslint simpleChain.js levelSandbox.js test.js",
-    "test": "npm run clear && node test.js"
+    "test": "npm run clear && mocha --require @babel/register test/**/*.spec.js --exit"
   },
   "keywords": [],
   "author": "",
@@ -17,9 +17,14 @@
     "npm": "6.9.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.4.3",
+    "@babel/register": "^7.4.0",
+    "chai": "^4.2.0",
+    "chai-http": "^4.2.1",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.16.0",
+    "mocha": "^6.1.2",
     "rimraf": "^2.6.3"
   },
   "dependencies": {
