@@ -1,8 +1,11 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
-const bitcoin = require('bitcoinjs-lib');
-const bitcoinMessage = require('bitcoinjs-message');
 const app = require('../app');
+const {
+    signMessage,
+    generateRamdomKeyPair,
+    p2pkhAddress,
+} = require('../src/utils');
 
 chai.use(chaiHttp);
 
@@ -26,12 +29,11 @@ describe('notary service', () => {
     let message;
 
     before(() => {
-        keyPair = bitcoin.ECPair.makeRandom();
-        // eslint-disable-next-line prefer-destructuring
-        address = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey }).address;
+        keyPair = generateRamdomKeyPair();
+        address = p2pkhAddress(keyPair);
     });
 
-    describe('/requestValidation', () => {
+    describe('POST /requestValidation', () => {
         let response;
 
         before(async () => {
@@ -73,11 +75,15 @@ describe('notary service', () => {
         });
     });
 
-    describe('/message-signature/validate', () => {
+    describe('POST /message-signature/validate', () => {
         let response;
 
         before(async () => {
-            const signature = bitcoinMessage.sign(message, keyPair.privateKey, keyPair.compressed);
+            const signature = signMessage({
+                message,
+                privateKey: keyPair.privateKey,
+                compressed: keyPair.compressed,
+            });
             response = await chai.request(app)
                 .post('/message-signature/validate')
                 .send({ address, signature });
@@ -120,4 +126,19 @@ describe('notary service', () => {
             });
         });
     });
+
+    // describe('POST /block', () => {
+    //     let response;
+    //     const star = {
+    //         dec: '68° 52\' 56.9',
+    //         ra: '16h 29m 1.0s',
+    //         story: 'Found star using https://www.google.com/sky/',
+    //     };
+
+    //     before(async () => {
+    //         response = await chai.request(app)
+    //             .post('/block')
+    //             .send({ address, star });
+    //     });
+    // });
 });

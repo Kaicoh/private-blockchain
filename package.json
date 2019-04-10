@@ -6,7 +6,7 @@
   "scripts": {
     "start": "npm run clear && node app.js",
     "clear": "rimraf ./chaindata",
-    "lint": "eslint simpleChain.js levelSandbox.js test.js",
+    "lint": "eslint app.js src/**/*.js test/**/*.js",
     "test": "npm run clear && mocha --require @babel/register test/**/*.spec.js --exit"
   },
   "keywords": [],

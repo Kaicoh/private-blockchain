@@ -1,4 +1,4 @@
-const { validateRequest } = require('./utils');
+const { verifySignature } = require('./utils');
 
 const TimeoutRequestsWindowTime = 5 * 60 * 1000;
 
@@ -57,7 +57,7 @@ class Mempool {
     }
 
     validRequest(walletAddress, signature) {
-        const validationResult = validateRequest({
+        const validationResult = verifySignature({
             message: this.message(walletAddress),
             address: walletAddress,
             signature,
