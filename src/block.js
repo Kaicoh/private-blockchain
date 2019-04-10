@@ -18,9 +18,26 @@ class Block {
     }) {
         this.hash = hash;
         this.height = height;
-        this.body = body;
         this.time = time;
         this.previousBlockHash = previousBlockHash;
+
+        switch (typeof body) {
+        case 'string':
+            // This case is for creating genesis block.
+            this.body = body;
+            break;
+        case 'object':
+            this.body = {
+                address: body.address,
+                star: {
+                    ...body.star,
+                    story: Buffer.from(body.star.story).toString('hex'),
+                },
+            };
+            break;
+        default:
+            this.body = body;
+        }
     }
 
     resetHash() {

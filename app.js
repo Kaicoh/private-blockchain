@@ -49,7 +49,7 @@ app.post('/block', async (req, res) => {
             const block = await blockchain.addBlock(new Block({ body: { address, star } }));
 
             // A user can create only one block at a time.
-            // To register another block, he/she needs to begin first process.
+            // To register another block, he/she needs to post request from the beginning.
             // POST /requestValidation => POST /message-signature/validate ....
             mempool.removeValidAddress(address);
             return res.status(201).json(block);
