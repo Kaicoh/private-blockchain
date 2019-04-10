@@ -1,7 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { Blockchain, Block } = require('./simpleChain');
-const Mempool = require('./mempool');
+const Block = require('./src/block');
+const Blockchain = require('./src/blockchain');
+const Mempool = require('./src/mempool');
 
 const app = express();
 const port = 8000;
@@ -42,12 +43,21 @@ app.get('/block/:blockHeight', async (req, res) => {
 });
 
 app.post('/block', async (req, res) => {
-    const data = req.body.body;
-    if (data) {
-        const block = await blockchain.addBlock(new Block({ data }));
-        return res.status(201).json(block);
+    const { address, star } = req.body;
+    if (address && star) {
+        if (mempool.isVerified(address)) {
+            const block = await blockchain.addBlock(new Block({ body: { address, star } }));
+
+            // A user can create only one block at a time.
+            // To register another block, he/she needs to begin first process.
+            // POST /requestValidation => POST /message-signature/validate ....
+            mempool.removeValidAddress(address);
+            return res.status(201).json(block);
+        }
+
+        return res.status(400).send('Invalid address.');
     }
-    return res.status(400).send('Data payload is required. And it must have "body" property.');
+    return res.status(400).send('Data payload is required. And it must have "address" and "star" property.');
 });
 
 app.listen(port, () => {

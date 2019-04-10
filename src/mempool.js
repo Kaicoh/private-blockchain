@@ -81,6 +81,14 @@ class Mempool {
 
         return validRequestObject;
     }
+
+    isVerified(walletAddress) {
+        return this.validAddresses.has(walletAddress);
+    }
+
+    removeValidAddress(walletAddress) {
+        this.validAddresses.delete(walletAddress);
+    }
 }
 
 module.exports = Mempool;

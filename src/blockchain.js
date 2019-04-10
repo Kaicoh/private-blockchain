@@ -1,47 +1,6 @@
-/* ===== SHA256 with Crypto-js ===============================
-|  Learn more: Crypto-js: https://github.com/brix/crypto-js  |
-|  =========================================================*/
-
-const SHA256 = require('crypto-js/sha256');
 const R = require('ramda');
-const dbService = require('./levelSandbox');
-
-/* ===== Block Class ==============================
-|  Class with a constructor for block             |
-|  ===============================================*/
-
-class Block {
-    constructor({
-        hash = '',
-        data = '',
-        height = 0,
-        time = new Date().getTime().toString().slice(0, -3),
-        previousBlockHash = '',
-    }) {
-        this.hash = hash;
-        this.height = height;
-        this.data = data;
-        this.time = time;
-        this.previousBlockHash = previousBlockHash;
-    }
-
-    resetHash() {
-        this.hash = this.calculateHash();
-    }
-
-    calculateHash() {
-        const currentHash = this.hash;
-        // NOTE: To calculate correct value. we need to clear the hash property.
-        this.hash = '';
-        const calculatedValue = SHA256(JSON.stringify(this)).toString();
-        this.hash = currentHash;
-        return calculatedValue;
-    }
-
-    validateHash() {
-        return this.hash === this.calculateHash();
-    }
-}
+const dbService = require('./dbService');
+const Block = require('./block');
 
 /* ===== Blockchain Class ==========================
 |  Class with a constructor for new blockchain     |
@@ -49,7 +8,7 @@ class Block {
 
 class Blockchain {
     static storeGenesisBlock() {
-        const genesisBlock = new Block({ data: 'First block in the chain - Genesis block' });
+        const genesisBlock = new Block({ body: 'First block in the chain - Genesis block' });
         genesisBlock.resetHash();
         return dbService.store(0, genesisBlock);
     }
@@ -171,7 +130,4 @@ class Blockchain {
     }
 }
 
-module.exports = {
-    Block,
-    Blockchain,
-};
+module.exports = Blockchain;
