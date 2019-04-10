@@ -20,6 +20,21 @@ app.post('/requestValidation', (req, res) => {
     return res.status(400).send('Data payload is required. And it must have "address" property.');
 });
 
+app.post('/message-signature/validate', (req, res) => {
+    const { address, signature } = req.body;
+    if (address && signature) {
+        // check if the address is in the mempool and not timeout.
+        if (mempool.timeLeft(address) <= 0) {
+            return res.status(400).send('Timeout or your address is not registered.');
+        }
+
+        // validate signature and return validRequest object.
+        const validRequest = mempool.validRequest(address, signature);
+        return res.json(validRequest);
+    }
+    return res.status(400).send('Data payload is required. And it must have "address" and "signature" property.');
+});
+
 app.get('/block/:blockHeight', async (req, res) => {
     const blockHeight = parseInt(req.params.blockHeight, 10);
     const block = await blockchain.getBlock(blockHeight);

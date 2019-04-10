@@ -1,9 +1,13 @@
+const { validateRequest } = require('./utils');
+
 const TimeoutRequestsWindowTime = 5 * 60 * 1000;
 
 class Mempool {
     constructor() {
-        // key: walletAddress, value: requestTimeStamp
+        // MEMO: key: walletAddress, value: requestTimeStamp
         this.requests = new Map();
+        // MEMO: verified addresses set
+        this.validAddresses = new Set();
     }
 
     // add key(walletAddress), value(timeStamp) to requests Map and return requestObject.
@@ -15,7 +19,7 @@ class Mempool {
 
         this.requests.set(walletAddress, new Date().getTime());
 
-        // key-value pair will be removed automatically, when they expire.
+        // A key-value pair will be removed automatically, when it expires.
         setTimeout(() => {
             this.requests.delete(walletAddress);
         }, TimeoutRequestsWindowTime);
@@ -32,17 +36,48 @@ class Mempool {
         return 0;
     }
 
-    requestObject(walletAddress) {
-        if (this.requests.has(walletAddress)) {
-            const requestTimeStamp = this.requests.get(walletAddress).toString().slice(0, -3);
-            return {
-                walletAddress,
-                requestTimeStamp,
-                message: `${walletAddress}:${requestTimeStamp}:starRegistry`,
-                validationWindow: parseInt(TimeoutRequestsWindowTime / 1000, 10),
-            };
+    requestTimeStamp(walletAddress) {
+        if (!this.requests.has(walletAddress)) {
+            throw new Error('the walletAddress is not registered');
         }
-        return null;
+        return this.requests.get(walletAddress).toString().slice(0, -3);
+    }
+
+    message(walletAddress) {
+        return `${walletAddress}:${this.requestTimeStamp(walletAddress)}:starRegistry`;
+    }
+
+    requestObject(walletAddress) {
+        return {
+            walletAddress,
+            requestTimeStamp: this.requestTimeStamp(walletAddress),
+            message: this.message(walletAddress),
+            validationWindow: parseInt(TimeoutRequestsWindowTime / 1000, 10),
+        };
+    }
+
+    validRequest(walletAddress, signature) {
+        const validationResult = validateRequest({
+            message: this.message(walletAddress),
+            address: walletAddress,
+            signature,
+        });
+
+        const validRequestObject = {
+            registerStar: validationResult,
+            status: {
+                ...this.requestObject(walletAddress),
+                validationWindow: this.timeLeft(walletAddress),
+                messageSignature: validationResult,
+            },
+        };
+
+        if (validationResult) {
+            this.requests.delete(walletAddress);
+            this.validAddresses.add(walletAddress);
+        }
+
+        return validRequestObject;
     }
 }
 
