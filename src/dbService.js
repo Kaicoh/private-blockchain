@@ -3,6 +3,7 @@
 |  =============================================================*/
 const path = require('path');
 const level = require('level');
+const R = require('ramda');
 
 const chainDB = path.join(__dirname, '../chaindata');
 const db = level(chainDB);
@@ -61,9 +62,30 @@ function getDataByHash(hash) {
     });
 }
 
+function getDataByAddress(address) {
+    const blocks = [];
+    return new Promise((resolve, reject) => {
+        db.createReadStream()
+            .on('data', function (data) {
+                const object = JSON.parse(data.value);
+                if (R.hasPath(['body', 'address'], object) && object.body.address === address) {
+                    blocks.push(object);
+                }
+            })
+            .on('error', function (err) {
+                console.log('Unable to read data stream!', err);
+                reject(err);
+            })
+            .on('close', function () {
+                resolve(blocks);
+            });
+    });
+}
+
 module.exports = {
     store: addLevelDBData,
     get: getLevelDBData,
     getDataCount,
     getByHash: getDataByHash,
+    getByAddress: getDataByAddress,
 };

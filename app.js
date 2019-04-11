@@ -46,15 +46,7 @@ app.post('/block', async (req, res) => {
     const { address, star } = req.body;
     if (address && star) {
         if (mempool.isVerified(address)) {
-            const block = await blockchain.addBlock(new Block({
-                body: {
-                    address,
-                    star: {
-                        ...star,
-                        story: Buffer.from(star.story).toString('hex'),
-                    },
-                },
-            }));
+            const block = await blockchain.addBlock(Block.buildStarBlock(address, star));
 
             // A user can create only one block at a time.
             // To register another block, he/she needs to post request from the beginning.
@@ -76,12 +68,32 @@ app.get('/stars/:key', async (req, res) => {
         const block = await blockchain.getBlockByHash(hash);
         return block ? res.json(block.decoded()) : res.sendStatus(404);
     }
+
+    const addressRegExp = /^address:?(\w{34})$/;
+    const addressMatch = addressRegExp.exec(req.params.key);
+    if (addressMatch) {
+        const address = addressMatch[1];
+        const blocks = await blockchain.getBlocksByAddress(address);
+        return blocks.length > 0
+            ? res.json(blocks.map(block => block.decoded())) : res.sendStatus(404);
+    }
+
     return res.sendStatus(404);
+});
+
+// For test purpose
+app.post('/dummyBlock', async (req, res) => {
+    if (process.env.NODE_ENV === 'test') {
+        const { address, star } = req.body;
+        const block = await blockchain.addBlock(Block.buildStarBlock(address, star));
+        return res.status(201).json(block.decoded());
+    }
+    return res.sendStatus(403);
 });
 
 app.listen(port, () => {
     console.log(`Express app listening on port ${port}`);
 });
 
-// Exports for test
+// Export for test
 module.exports = app;

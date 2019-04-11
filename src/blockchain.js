@@ -73,6 +73,12 @@ class Blockchain {
         });
     }
 
+    getBlocksByAddress(address) { // eslint-disable-line class-methods-use-this
+        return dbService.getByAddress(address)
+            .then(objects => objects.map(obj => new Block(obj)))
+            .then(blocks => blocks.sort((a, b) => a.height - b.height));
+    }
+
     getLastBlock() {
         return this.getBlockHeight().then(height => this.getBlock(height));
     }

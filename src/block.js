@@ -11,6 +11,18 @@ const hex2ascii = require('hex2ascii');
 |  ===============================================*/
 
 class Block {
+    static buildStarBlock(address, star) {
+        return new Block({
+            body: {
+                address,
+                star: {
+                    ...star,
+                    story: Buffer.from(star.story).toString('hex'),
+                },
+            },
+        });
+    }
+
     constructor({
         hash = '',
         body = '',

@@ -4,10 +4,10 @@
   "description": "Blockchain has the potential to change the way that the world approaches data. Develop Blockchain skills by understanding the data model behind Blockchain by developing your own simplified private blockchain.",
   "main": "app.js",
   "scripts": {
-    "start": "npm run clear && node app.js",
+    "start": "npm run clear && NODE_ENV=development node app.js",
     "clear": "rimraf ./chaindata",
     "lint": "eslint app.js src/**/*.js test/**/*.js",
-    "test": "npm run clear && mocha --require @babel/register test/**/*.spec.js --exit"
+    "test": "npm run clear && NODE_ENV=test mocha --require @babel/register test/**/*.spec.js --exit"
   },
   "keywords": [],
   "author": "",

@@ -5,6 +5,7 @@ const {
     signMessage,
     generateRamdomKeyPair,
     p2pkhAddress,
+    generateRamdomAddress,
 } = require('../src/utils');
 
 chai.use(chaiHttp);
@@ -23,7 +24,7 @@ describe('get genesis block', () => {
     });
 });
 
-describe('notary service', () => {
+describe('registering star', () => {
     let keyPair;
     let address;
     let message;
@@ -200,7 +201,7 @@ describe('notary service', () => {
         });
     });
 
-    describe('GET /block', () => {
+    describe('GET /block/:blockHeight', () => {
         let response;
 
         before(async () => {
@@ -257,8 +258,40 @@ describe('notary service', () => {
             });
         });
     });
+});
 
-    describe('GET /stars', () => {
+
+describe('get stars', () => {
+    let hash;
+    const address1 = generateRamdomAddress();
+    const address2 = generateRamdomAddress();
+
+    const star1 = {
+        dec: '68° 52\' 56.9',
+        ra: '16h 29m 1.0s',
+        story: 'Found star using https://www.google.com/sky/',
+    };
+    const star2 = {
+        dec: '-26° 29\' 24.9',
+        ra: '16h 29m 1.0s',
+        story: 'This is a second dummy data',
+    };
+    const star3 = {
+        dec: '-27° 14\' 8.2',
+        ra: '17h 22m 13.1s',
+        story: 'This is a third dummy data',
+    };
+
+    // create blocks for test
+    before(async () => {
+        const response = await chai.request(app).post('/dummyBlock').send({ address: address1, star: star1 });
+        hash = response.body.hash; // eslint-disable-line prefer-destructuring
+
+        await chai.request(app).post('/dummyBlock').send({ address: address2, star: star2 });
+        await chai.request(app).post('/dummyBlock').send({ address: address2, star: star3 });
+    });
+
+    describe('GET /stars/hash:blockHash', () => {
         let response;
 
         before(async () => {
@@ -282,28 +315,28 @@ describe('notary service', () => {
             });
 
             it('has height property', () => {
-                expect(body).to.have.property('height', height);
+                expect(body).to.have.property('height').that.is.a('number');
             });
 
             it('has body.address property', () => {
-                expect(body).to.have.nested.property('body.address', address);
+                expect(body).to.have.nested.property('body.address', address1);
             });
 
             it('has body.star.dec property', () => {
-                expect(body).to.have.nested.property('body.star.dec', star.dec);
+                expect(body).to.have.nested.property('body.star.dec', star1.dec);
             });
 
             it('has body.star.ra property', () => {
-                expect(body).to.have.nested.property('body.star.ra', star.ra);
+                expect(body).to.have.nested.property('body.star.ra', star1.ra);
             });
 
             it('has body.star.story property', () => {
-                const encodedStory = Buffer.from(star.story).toString('hex');
+                const encodedStory = Buffer.from(star1.story).toString('hex');
                 expect(body).to.have.nested.property('body.star.story', encodedStory);
             });
 
             it('has body.star.storyDecoded property', () => {
-                expect(body).to.have.nested.property('body.star.storyDecoded', star.story);
+                expect(body).to.have.nested.property('body.star.storyDecoded', star1.story);
             });
 
             it('has time property', () => {
@@ -312,6 +345,47 @@ describe('notary service', () => {
 
             it('has previousBlockHash property', () => {
                 expect(body).to.have.property('previousBlockHash').and.match(/\w{64}/);
+            });
+        });
+    });
+
+    describe('GET /stars/address:walletAddress', () => {
+        let response;
+
+        before(async () => {
+            response = await chai.request(app)
+                .get(`/stars/address:${address2}`);
+        });
+
+        it('returns http status 200', () => {
+            expect(response).to.have.status(200);
+        });
+
+        describe('returns an array', () => {
+            it('of collect length', () => {
+                expect(response.body).to.be.an('array').and.have.lengthOf(2);
+            });
+
+            it('contains blocks which have all same body.address property', () => {
+                response.body.forEach((block) => {
+                    expect(block).to.have.nested.property('body.address', address2);
+                });
+            });
+
+            it('contains blocks which have all have body.star property', () => {
+                expect(response.body[0]).to.have.nested.property('body.star')
+                    .and.deep.equal({
+                        ...star2,
+                        story: Buffer.from(star2.story).toString('hex'),
+                        storyDecoded: star2.story,
+                    });
+
+                expect(response.body[1]).to.have.nested.property('body.star')
+                    .and.deep.equal({
+                        ...star3,
+                        story: Buffer.from(star3.story).toString('hex'),
+                        storyDecoded: star3.story,
+                    });
             });
         });
     });
