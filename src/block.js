@@ -3,6 +3,8 @@
 |  =========================================================*/
 
 const SHA256 = require('crypto-js/sha256');
+const R = require('ramda');
+const hex2ascii = require('hex2ascii');
 
 /* ===== Block Class ==============================
 |  Class with a constructor for block             |
@@ -55,6 +57,24 @@ class Block {
 
     validateHash() {
         return this.hash === this.calculateHash();
+    }
+
+    // return object with "storyDecoded" property
+    responseFormat() {
+        // genesis block does not have star property in its body.
+        if (R.hasPath(['body', 'star', 'story'], this)) {
+            return {
+                ...this,
+                body: {
+                    ...this.body,
+                    star: {
+                        ...this.body.star,
+                        storyDecoded: hex2ascii(this.body.star.story),
+                    },
+                },
+            };
+        }
+        return this;
     }
 }
 

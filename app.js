@@ -52,7 +52,7 @@ app.post('/block', async (req, res) => {
             // To register another block, he/she needs to post request from the beginning.
             // POST /requestValidation => POST /message-signature/validate ....
             mempool.removeValidAddress(address);
-            return res.status(201).json(block);
+            return res.status(201).json(block.responseFormat());
         }
 
         return res.status(400).send('Invalid address.');

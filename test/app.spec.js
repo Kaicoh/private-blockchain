@@ -177,6 +177,10 @@ describe('notary service', () => {
                 expect(body).to.have.nested.property('body.star.story', encodedStory);
             });
 
+            it('has body.star.storyDecoded property', () => {
+                expect(body).to.have.nested.property('body.star.storyDecoded', star.story);
+            });
+
             it('has time property', () => {
                 expect(body).to.have.property('time').and.match(/\d{10}/);
             });
