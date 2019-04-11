@@ -41,8 +41,29 @@ function getDataCount() {
     });
 }
 
+function getDataByHash(hash) {
+    let block = null;
+    return new Promise((resolve, reject) => {
+        db.createReadStream()
+            .on('data', function (data) {
+                const object = JSON.parse(data.value);
+                if (object.hash === hash) {
+                    block = object;
+                }
+            })
+            .on('error', function (err) {
+                console.log('Unable to read data stream!', err);
+                reject(err);
+            })
+            .on('close', function () {
+                resolve(block);
+            });
+    });
+}
+
 module.exports = {
     store: addLevelDBData,
     get: getLevelDBData,
     getDataCount,
+    getByHash: getDataByHash,
 };

@@ -257,4 +257,62 @@ describe('notary service', () => {
             });
         });
     });
+
+    describe('GET /stars', () => {
+        let response;
+
+        before(async () => {
+            response = await chai.request(app)
+                .get(`/stars/hash:${hash}`);
+        });
+
+        it('returns http status 200', () => {
+            expect(response).to.have.status(200);
+        });
+
+        describe('returns an object', () => {
+            let body;
+
+            before(() => {
+                body = response.body; // eslint-disable-line prefer-destructuring
+            });
+
+            it('has hash property', () => {
+                expect(body).to.have.property('hash', hash);
+            });
+
+            it('has height property', () => {
+                expect(body).to.have.property('height', height);
+            });
+
+            it('has body.address property', () => {
+                expect(body).to.have.nested.property('body.address', address);
+            });
+
+            it('has body.star.dec property', () => {
+                expect(body).to.have.nested.property('body.star.dec', star.dec);
+            });
+
+            it('has body.star.ra property', () => {
+                expect(body).to.have.nested.property('body.star.ra', star.ra);
+            });
+
+            it('has body.star.story property', () => {
+                const encodedStory = Buffer.from(star.story).toString('hex');
+                expect(body).to.have.nested.property('body.star.story', encodedStory);
+            });
+
+            it('has body.star.storyDecoded property', () => {
+                expect(body).to.have.nested.property('body.star.storyDecoded', star.story);
+            });
+
+            it('has time property', () => {
+                expect(body).to.have.property('time').and.match(/\d{10}/);
+            });
+
+            it('has previousBlockHash property', () => {
+                expect(body).to.have.property('previousBlockHash').and.match(/\w{64}/);
+            });
+        });
+    });
 });

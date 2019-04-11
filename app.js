@@ -68,6 +68,17 @@ app.post('/block', async (req, res) => {
     return res.status(400).send('Data payload is required. And it must have "address" and "star" property.');
 });
 
+app.get('/stars/:key', async (req, res) => {
+    const hashRegExp = /^hash:?(\w{64})$/;
+    const hashMatch = hashRegExp.exec(req.params.key);
+    if (hashMatch) {
+        const hash = hashMatch[1];
+        const block = await blockchain.getBlockByHash(hash);
+        return block ? res.json(block.decoded()) : res.sendStatus(404);
+    }
+    return res.sendStatus(404);
+});
+
 app.listen(port, () => {
     console.log(`Express app listening on port ${port}`);
 });

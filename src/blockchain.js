@@ -64,6 +64,15 @@ class Blockchain {
         });
     }
 
+    getBlockByHash(hash) { // eslint-disable-line class-methods-use-this
+        return dbService.getByHash(hash).then((obj) => {
+            if (obj) {
+                return new Block(obj);
+            }
+            return null;
+        });
+    }
+
     getLastBlock() {
         return this.getBlockHeight().then(height => this.getBlock(height));
     }
