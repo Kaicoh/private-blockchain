@@ -19,27 +19,10 @@ class Block {
         previousBlockHash = '',
     }) {
         this.hash = hash;
+        this.body = body;
         this.height = height;
         this.time = time;
         this.previousBlockHash = previousBlockHash;
-
-        switch (typeof body) {
-        case 'string':
-            // This case is for creating genesis block.
-            this.body = body;
-            break;
-        case 'object':
-            this.body = {
-                address: body.address,
-                star: {
-                    ...body.star,
-                    story: Buffer.from(body.star.story).toString('hex'),
-                },
-            };
-            break;
-        default:
-            this.body = body;
-        }
     }
 
     resetHash() {
@@ -60,7 +43,7 @@ class Block {
     }
 
     // return object with "storyDecoded" property
-    responseFormat() {
+    decoded() {
         // genesis block does not have star property in its body.
         if (R.hasPath(['body', 'star', 'story'], this)) {
             return {

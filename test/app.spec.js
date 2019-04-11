@@ -27,6 +27,14 @@ describe('notary service', () => {
     let keyPair;
     let address;
     let message;
+    let height;
+    let hash;
+
+    const star = {
+        dec: '68° 52\' 56.9',
+        ra: '16h 29m 1.0s',
+        story: 'Found star using https://www.google.com/sky/',
+    };
 
     before(() => {
         keyPair = generateRamdomKeyPair();
@@ -129,11 +137,6 @@ describe('notary service', () => {
 
     describe('POST /block', () => {
         let response;
-        const star = {
-            dec: '68° 52\' 56.9',
-            ra: '16h 29m 1.0s',
-            story: 'Found star using https://www.google.com/sky/',
-        };
 
         before(async () => {
             response = await chai.request(app)
@@ -154,10 +157,74 @@ describe('notary service', () => {
 
             it('has hash property', () => {
                 expect(body).to.have.property('hash').and.match(/\w{64}/);
+
+                // store value to use in the following steps.
+                hash = body.hash; // eslint-disable-line prefer-destructuring
             });
 
             it('has height property', () => {
                 expect(body).to.have.property('height').that.is.a('number');
+
+                // store value to use in the following steps.
+                height = body.height; // eslint-disable-line prefer-destructuring
+            });
+
+            it('has body.address property', () => {
+                expect(body).to.have.nested.property('body.address', address);
+            });
+
+            it('has body.star.dec property', () => {
+                expect(body).to.have.nested.property('body.star.dec', star.dec);
+            });
+
+            it('has body.star.ra property', () => {
+                expect(body).to.have.nested.property('body.star.ra', star.ra);
+            });
+
+            it('has body.star.story property', () => {
+                const encodedStory = Buffer.from(star.story).toString('hex');
+                expect(body).to.have.nested.property('body.star.story', encodedStory);
+            });
+
+            it('has body.star.storyDecoded property', () => {
+                expect(body).to.have.nested.property('body.star.storyDecoded', star.story);
+            });
+
+            it('has time property', () => {
+                expect(body).to.have.property('time').and.match(/\d{10}/);
+            });
+
+            it('has previousBlockHash property', () => {
+                expect(body).to.have.property('previousBlockHash').and.match(/\w{64}/);
+            });
+        });
+    });
+
+    describe('GET /block', () => {
+        let response;
+
+        before(async () => {
+            response = await chai.request(app)
+                .get(`/block/${height}`);
+        });
+
+        it('returns http status 200', () => {
+            expect(response).to.have.status(200);
+        });
+
+        describe('returns an object', () => {
+            let body;
+
+            before(() => {
+                body = response.body; // eslint-disable-line prefer-destructuring
+            });
+
+            it('has hash property', () => {
+                expect(body).to.have.property('hash', hash);
+            });
+
+            it('has height property', () => {
+                expect(body).to.have.property('height', height);
             });
 
             it('has body.address property', () => {

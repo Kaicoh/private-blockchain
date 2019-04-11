@@ -39,20 +39,28 @@ app.post('/message-signature/validate', (req, res) => {
 app.get('/block/:blockHeight', async (req, res) => {
     const blockHeight = parseInt(req.params.blockHeight, 10);
     const block = await blockchain.getBlock(blockHeight);
-    return block ? res.json(block) : res.sendStatus(404);
+    return block ? res.json(block.decoded()) : res.sendStatus(404);
 });
 
 app.post('/block', async (req, res) => {
     const { address, star } = req.body;
     if (address && star) {
         if (mempool.isVerified(address)) {
-            const block = await blockchain.addBlock(new Block({ body: { address, star } }));
+            const block = await blockchain.addBlock(new Block({
+                body: {
+                    address,
+                    star: {
+                        ...star,
+                        story: Buffer.from(star.story).toString('hex'),
+                    },
+                },
+            }));
 
             // A user can create only one block at a time.
             // To register another block, he/she needs to post request from the beginning.
             // POST /requestValidation => POST /message-signature/validate ....
             mempool.removeValidAddress(address);
-            return res.status(201).json(block.responseFormat());
+            return res.status(201).json(block.decoded());
         }
 
         return res.status(400).send('Invalid address.');

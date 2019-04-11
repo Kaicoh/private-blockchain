@@ -10,7 +10,9 @@ const signMessage = ({ message, privateKey, compressed }) => (
 );
 
 const generateRamdomKeyPair = bitcoin.ECPair.makeRandom;
-const p2pkhAddress = keyPair => bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey }).address;
+const p2pkhAddress = keyPair => (
+    bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey }).address
+);
 
 module.exports = {
     verifySignature,
