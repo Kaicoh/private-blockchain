@@ -393,21 +393,45 @@ describe('get stars', () => {
     });
 });
 
-// Other specifications
-describe('POST /requestValidation', () => {
-    // spec:
-    // When re-submitting within validation window,
-    // the validation window should reduce until it expires.
-    const address = generateRamdomAddress();
+describe('other specifications', () => {
+    describe('POST /requestValidation', () => {
+        describe('when re-submitting within validation window', () => {
+            const address = generateRamdomAddress();
 
-    before(async () => {
-        await chai.request(app).post('/requestValidation').send({ address });
+            before(async () => {
+                await chai.request(app).post('/requestValidation').send({ address });
+            });
+
+            it('returns an object whose validationWindow is reduced', async () => {
+                await delay(1000);
+                const { body: { validationWindow } } = await chai
+                    .request(app).post('/requestValidation').send({ address });
+                expect(validationWindow).to.be.below(300);
+            });
+        });
     });
 
-    it('returns an object whose validationWindow is reduced', async () => {
-        await delay(1000);
-        const { body: { validationWindow } } = await chai
-            .request(app).post('/requestValidation').send({ address });
-        expect(validationWindow).to.be.below(300);
+    describe('POST /block', () => {
+        describe('when posting with not verified address', () => {
+            const address = generateRamdomAddress();
+            const star = {
+                dec: '68° 52\' 56.9',
+                ra: '16h 29m 1.0s',
+                story: 'Found star using https://www.google.com/sky/',
+            };
+            let response;
+
+            before(async () => {
+                response = await chai.request(app).post('/block').send({ address, star });
+            });
+
+            it('returns http status 400', () => {
+                expect(response).to.have.status(400);
+            });
+
+            it('returns an error message', () => {
+                expect(response.text).to.equal('Invalid address.');
+            });
+        });
     });
 });
