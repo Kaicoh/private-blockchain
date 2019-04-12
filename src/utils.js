@@ -19,10 +19,17 @@ const generateRamdomAddress = R.compose(
     generateRamdomKeyPair,
 );
 
+const delay = (duration, value) => (
+    new Promise((resolve) => {
+        setTimeout(() => resolve(value), duration);
+    })
+);
+
 module.exports = {
     verifySignature,
     signMessage,
     generateRamdomKeyPair,
     p2pkhAddress,
     generateRamdomAddress,
+    delay,
 };

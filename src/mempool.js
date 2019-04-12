@@ -24,7 +24,8 @@ class Mempool {
             this.requests.delete(walletAddress);
         }, TimeoutRequestsWindowTime);
 
-        return this.requestObject(walletAddress);
+        const validationWindow = parseInt(TimeoutRequestsWindowTime / 1000, 10);
+        return this.requestObject(walletAddress, validationWindow);
     }
 
     timeLeft(walletAddress) {
@@ -47,12 +48,12 @@ class Mempool {
         return `${walletAddress}:${this.requestTimeStamp(walletAddress)}:starRegistry`;
     }
 
-    requestObject(walletAddress) {
+    requestObject(walletAddress, validationWindow) {
         return {
             walletAddress,
             requestTimeStamp: this.requestTimeStamp(walletAddress),
             message: this.message(walletAddress),
-            validationWindow: parseInt(TimeoutRequestsWindowTime / 1000, 10),
+            validationWindow: validationWindow || this.timeLeft(walletAddress),
         };
     }
 

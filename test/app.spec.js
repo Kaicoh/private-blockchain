@@ -6,6 +6,7 @@ const {
     generateRamdomKeyPair,
     p2pkhAddress,
     generateRamdomAddress,
+    delay,
 } = require('../src/utils');
 
 chai.use(chaiHttp);
@@ -24,6 +25,7 @@ describe('get genesis block', () => {
     });
 });
 
+// Test registering star process
 describe('registering star', () => {
     let keyPair;
     let address;
@@ -388,5 +390,24 @@ describe('get stars', () => {
                     });
             });
         });
+    });
+});
+
+// Other specifications
+describe('POST /requestValidation', () => {
+    // spec:
+    // When re-submitting within validation window,
+    // the validation window should reduce until it expires.
+    const address = generateRamdomAddress();
+
+    before(async () => {
+        await chai.request(app).post('/requestValidation').send({ address });
+    });
+
+    it('returns an object whose validationWindow is reduced', async () => {
+        await delay(1000);
+        const { body: { validationWindow } } = await chai
+            .request(app).post('/requestValidation').send({ address });
+        expect(validationWindow).to.be.below(300);
     });
 });
