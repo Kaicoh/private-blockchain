@@ -76,8 +76,10 @@ class Mempool {
         };
 
         if (validationResult) {
-            this.requests.delete(walletAddress);
+            // no need to care about duplication. validAddresses is an instance of Set.
             this.validAddresses.add(walletAddress);
+        } else {
+            this.validAddresses.delete(walletAddress);
         }
 
         return validRequestObject;
@@ -88,6 +90,7 @@ class Mempool {
     }
 
     removeValidAddress(walletAddress) {
+        this.requests.delete(walletAddress);
         this.validAddresses.delete(walletAddress);
     }
 }
