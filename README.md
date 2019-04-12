@@ -53,7 +53,7 @@ The response looks like as follows. It returns in a JSON format.
 Using your wallet address and the message you got from the previous response, create signature and submit it to validate your wallet address.
 
 ### Request Body
-The request body must be JSON format and have "address" and "signature" property.
+The request body must be JSON format and have "address" and "signature" properties.
 
 ```
 {
@@ -81,10 +81,10 @@ The response looks like as follows. It returns in a JSON format.
 Now, you are granted to register a start to the blockchain.
 
 ### 3. POST http://localhost:8000/block
-Submit your address and star object to register star infomation.
+Submit your address and star object to register the star.
 
 ### Request Body
-The request body must be JSON format and have "address" and "star" property.
+The request body must be JSON format and have "address" and "star" properties.
 
 ```
 {
@@ -171,7 +171,7 @@ The response looks like as follows. It returns in a JSON format.
 }
 ```
 
-### 5. GET http://localhost:8000/stars/address:[walletAddress]
+### 6. GET http://localhost:8000/stars/address:[walletAddress]
 You get information about the blocks from the passed walletAddress value.
 
 ### Parameter
