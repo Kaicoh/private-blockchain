@@ -7,7 +7,7 @@
     "start": "npm run clear && NODE_ENV=development node app.js",
     "clear": "rimraf ./chaindata",
     "lint": "eslint app.js src/**/*.js test/**/*.js",
-    "test": "npm run clear && NODE_ENV=test mocha --require @babel/register --timeout 5000 test/**/*.spec.js --exit"
+    "test": "npm run clear && NODE_ENV=test mocha --timeout 5000 test/**/*.spec.js --exit"
   },
   "keywords": [],
   "author": "",
@@ -17,8 +17,6 @@
     "npm": "6.9.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.4.3",
-    "@babel/register": "^7.4.0",
     "chai": "^4.2.0",
     "chai-http": "^4.2.1",
     "eslint": "^5.16.0",
